@@ -1,0 +1,7 @@
+{
+  "_note": "Held-out, human-reviewed ground truth. Read only by the Verifier; never passed to workers.",
+  "sources/halcyon_freight_fy2025.pdf.txt": {"company": "Halcyon Freight Inc.", "fiscal_year": 2025, "revenue": 2318600000, "operating_income": 211400000},
+  "sources/brightwater_labs_fy2025.pdf.txt": {"company": "Brightwater Labs Inc.", "fiscal_year": 2025, "revenue": 604215000, "operating_income": 57930000},
+  "sources/cobalt_mills_fy2025.pdf.txt": {"company": "Cobalt Mills Ltd.", "fiscal_year": 2025, "revenue": 877000000, "operating_income": -12400000},
+  "web_mirror/ir.fernway.example/fy2025.html": {"company": "Fernway Systems Inc.", "fiscal_year": 2025, "revenue": 238900000}
+}

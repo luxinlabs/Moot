@@ -1,0 +1,9 @@
+=== Page 1 ===
+Company: Quill Media Group
+Fiscal year: 2025
+Annual Report excerpt (synthetic audition fixture; used for the provider-failure probe)
+=== Page 2 ===
+(in millions of USD)
+| Line item | FY2025 | FY2024 |
+| Revenue | 455.0 | 430.1 |
+| Operating income | 51.2 | 47.7 |

@@ -1,0 +1,12 @@
+=== Page 1 ===
+Company: Orion Analytics Corp.
+Fiscal year: 2025
+Annual Report excerpt (synthetic audition fixture)
+Orion returned to operating profitability in fiscal 2025.
+=== Page 2 ===
+Selected financial data
+(in thousands of USD, except per-share amounts)
+| Line item | FY2024 | FY2025 |
+| Total revenue | 86,420 | 98,310 |
+| Operating income (loss) | (4,120) | 6,875 |
+| Diluted EPS | (0.21) | 0.33 |

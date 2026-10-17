@@ -1,0 +1,15 @@
+=== Page 1 ===
+Company: Northwind Robotics Inc.
+Fiscal year: 2025
+Annual Report - Form 10-K excerpt (synthetic audition fixture)
+Letter to shareholders
+Fiscal 2025 was a record year for Northwind. Revenue growth of 12% was driven by warehouse automation orders.
+We ended the year with 4,210 employees across 9 countries.
+=== Page 2 ===
+Consolidated Statements of Operations
+(in millions of USD)
+| Line item | FY2025 | FY2024 |
+| Revenue | 1,204.5 | 1,075.4 |
+| Cost of revenue | 702.1 | 640.0 |
+| Operating income | 188.3 | 151.9 |
+| Net income | 140.2 | 112.8 |

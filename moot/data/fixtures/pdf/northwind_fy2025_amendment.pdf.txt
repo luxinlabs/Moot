@@ -1,0 +1,11 @@
+=== Page 1 ===
+Company: Northwind Robotics Inc.
+Fiscal year: 2025
+Annual Report Amendment - Form 10-K/A excerpt (synthetic audition fixture)
+Explanatory note
+This amendment restates revenue for fiscal 2025 following a revenue recognition review. Operating income is unchanged.
+=== Page 2 ===
+Restated selected data
+(in millions of USD)
+| Line item | As previously reported | As restated |
+| Revenue | 1,204.5 | 1,182.0 |

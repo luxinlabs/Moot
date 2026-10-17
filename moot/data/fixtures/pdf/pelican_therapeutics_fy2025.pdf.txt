@@ -1,0 +1,12 @@
+=== Page 1 ===
+Company: Pelican Therapeutics Inc.
+Fiscal year: 2025
+Annual Report excerpt (synthetic audition fixture; the statement excerpt deliberately omits operating income)
+Pelican is a clinical-stage company. Product revenue began in Q3 following approval in one market.
+=== Page 2 ===
+Statement excerpt
+(in millions of USD)
+| Line item | FY2025 | FY2024 |
+| Revenue | 3.2 | - |
+| Total operating expenses | 41.7 | 38.0 |
+| Net loss | (37.9) | (36.4) |

@@ -1,0 +1,10 @@
+=== Page 1 ===
+Company: Cobalt Mills Ltd.
+Fiscal year: 2025
+Annual Report excerpt (synthetic held-out document, never used in auditions)
+Weak steel demand weighed on results.
+=== Page 2 ===
+(in millions of USD)
+| Line item | FY2025 | FY2024 |
+| Revenue | 877.0 | 902.3 |
+| Operating income (loss) | (12.4) | 31.8 |

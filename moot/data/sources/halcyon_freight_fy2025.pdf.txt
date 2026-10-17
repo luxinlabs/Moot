@@ -1,0 +1,14 @@
+=== Page 1 ===
+Company: Halcyon Freight Inc.
+Fiscal year: 2025
+Annual Report excerpt (synthetic held-out document, never used in auditions)
+Halcyon operates 2,300 trucks across North America.
+=== Page 2 ===
+Management discussion
+Freight volumes recovered in the second half of the year.
+=== Page 3 ===
+Consolidated Statements of Operations
+(in millions of USD)
+| Line item | FY2025 | FY2024 |
+| Revenue | 2,318.6 | 2,140.2 |
+| Operating income | 211.4 | 176.0 |

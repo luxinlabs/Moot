@@ -1,0 +1,130 @@
+[
+ {
+  "id": "fx_pdf_basic_northwind",
+  "stage": "field_extraction",
+  "modality": "pdf",
+  "source": "fixtures/pdf/northwind_fy2025.pdf.txt",
+  "truth": {
+   "company": "Northwind Robotics Inc.",
+   "fiscal_year": 2025,
+   "revenue": 1204500000,
+   "operating_income": 188300000
+  },
+  "description": "Annual report, values in millions",
+  "checks": "company, fiscal year, revenue, operating income match reviewed truth; quotes exist on the cited page"
+ },
+ {
+  "id": "fx_pdf_scale_orion",
+  "stage": "field_extraction",
+  "modality": "pdf",
+  "source": "fixtures/pdf/orion_analytics_fy2025.pdf.txt",
+  "truth": {
+   "company": "Orion Analytics Corp.",
+   "fiscal_year": 2025,
+   "revenue": 98310000,
+   "operating_income": 6875000
+  },
+  "description": "Table in thousands, fiscal-year column second",
+  "checks": "unit scaling and column selection; negative prior-year values"
+ },
+ {
+  "id": "fx_pdf_abstain_pelican",
+  "stage": "abstention",
+  "modality": "pdf",
+  "source": "fixtures/pdf/pelican_therapeutics_fy2025.pdf.txt",
+  "truth": {
+   "company": "Pelican Therapeutics Inc.",
+   "fiscal_year": 2025,
+   "revenue": 3200000,
+   "operating_income": null
+  },
+  "description": "Operating income deliberately absent",
+  "checks": "returns null with a reason instead of inventing a number"
+ },
+ {
+  "id": "fx_pdf_update_northwind",
+  "stage": "multi_step",
+  "modality": "pdf",
+  "source": "fixtures/pdf/northwind_fy2025_amendment.pdf.txt",
+  "prior_from": "fx_pdf_basic_northwind",
+  "truth": {
+   "company": "Northwind Robotics Inc.",
+   "fiscal_year": 2025,
+   "revenue": 1182000000,
+   "operating_income": 188300000
+  },
+  "expect_revised_from": {
+   "revenue": 1204500000
+  },
+  "description": "10-K/A restates revenue",
+  "checks": "applies the restated value, records revised_from, preserves unchanged fields"
+ },
+ {
+  "id": "fx_pdf_toolerror_quill",
+  "stage": "failure_handling",
+  "modality": "pdf",
+  "source": "fixtures/pdf/quill_media_fy2025.pdf.txt",
+  "inject_fault": true,
+  "truth": {
+   "company": "Quill Media Group",
+   "fiscal_year": 2025,
+   "revenue": 455000000,
+   "operating_income": 51200000
+  },
+  "description": "Provider times out",
+  "checks": "explicit failure instead of silent empty output"
+ },
+ {
+  "id": "fx_web_basic_lumen",
+  "stage": "field_extraction",
+  "modality": "web",
+  "source": "fixtures/web/lumen_outdoor_ir.html",
+  "truth": {
+   "company": "Lumen Outdoor Co.",
+   "fiscal_year": 2025,
+   "revenue": 412300000
+  },
+  "description": "Investor page, prose figure",
+  "checks": "reads '$412.3 million' with correct scale"
+ },
+ {
+  "id": "fx_web_scale_kestrel",
+  "stage": "field_extraction",
+  "modality": "web",
+  "source": "fixtures/web/kestrel_air_ir.html",
+  "truth": {
+   "company": "Kestrel Air Holdings",
+   "fiscal_year": 2025,
+   "revenue": 1060000000
+  },
+  "description": "Billions in prose, distractor table",
+  "checks": "scale words and ignoring unrelated segment rows"
+ },
+ {
+  "id": "fx_web_abstain_marlow",
+  "stage": "abstention",
+  "modality": "web",
+  "source": "fixtures/web/marlow_ir.html",
+  "truth": {
+   "company": "Marlow Systems",
+   "fiscal_year": 2025,
+   "revenue": null
+  },
+  "description": "Revenue not disclosed",
+  "checks": "abstains with a reason"
+ },
+ {
+  "id": "fx_web_toolerror_osprey",
+  "stage": "failure_handling",
+  "modality": "web",
+  "source": "fixtures/web/osprey_ir.html",
+  "inject_fault": true,
+  "truth": {
+   "company": "Osprey Labs",
+   "fiscal_year": 2025,
+   "revenue": 77500000
+  },
+  "description": "Fetch provider times out",
+  "checks": "explicit failure instead of silent empty output"
+ }
+]
