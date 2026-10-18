@@ -1,0 +1,13 @@
+.git
+.env
+**/.env
+**/.env.*
+**/__pycache__
+**/*.pyc
+**/.venv
+**/runtime
+**/data/sources/uploads
+**/.DS_Store
+**/.pytest_cache
+**/node_modules
+.mcp-use

@@ -7,5 +7,7 @@ __pycache__/
 .venv/
 venv/
 node_modules/
-moot/runtime/
-moot/data/sources/uploads/
+runtime/
+data/sources/uploads/
+.pytest_cache/
+.mcp-use/

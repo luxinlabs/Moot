@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moot — hire agents with evidence</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#fff; --ink:#14171f; --muted:#5d6574; --line:#e3e6ec; --soft:#f0f2f6; --console:#0f1218; --console-ink:#d7dbe4;
+  --accent:#5b4bdb; --accent-ink:#fff; --accent-soft:#ecebfd;
+  --ok:#137a4b; --ok-soft:#e3f5ec; --bad:#b4232c; --bad-soft:#fbe7e8; --warn:#9a5b00; --warn-soft:#fdf1dc;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --claude:#c96442; --openai:#10a37f; --glm:#3a6df0; --base:#7b8494;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0d0f13; --panel:#161920; --ink:#e8eaf0; --muted:#98a0af; --line:#272c36; --soft:#1e222a; --console:#0a0c10; --console-ink:#cfd5e0;
+  --accent:#8b7ff5; --accent-ink:#0d0f13; --accent-soft:#262246;
+  --ok:#46c98a; --ok-soft:#13301f; --bad:#f07178; --bad-soft:#3a1c20; --warn:#f0b450; --warn-soft:#352914;
+}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;display:flex;flex-direction:column}
+a{color:var(--accent)}
+header{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel);flex:none}
+.logo{font-weight:800;font-size:19px;letter-spacing:-.02em}.logo span{color:var(--accent)}
+.tag{color:var(--muted);font-size:13px}
+header .sp{flex:1}
+button,select{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button:disabled{opacity:.5;cursor:not-allowed}
+.app{flex:1;display:grid;grid-template-columns:420px 1fr;min-height:0}
+@media (max-width:1000px){.app{grid-template-columns:1fr;overflow:auto}.chat{height:80vh}}
+.chat{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-height:0}
+.msgs{flex:1;overflow-y:auto;padding:16px}
+.msg{margin:0 0 12px;display:flex;gap:8px}
+.msg .av{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:12px;font-weight:700}
+.msg.moot .av{background:var(--accent);color:var(--accent-ink)}
+.msg.user{flex-direction:row-reverse}
+.msg.user .av{background:var(--soft);color:var(--muted)}
+.bubble{max-width:330px;padding:9px 12px;border-radius:12px;background:var(--soft);font-size:13.5px}
+.msg.user .bubble{background:var(--accent);color:var(--accent-ink)}
+.bubble .small{font-size:12px}
+.bubble ul{margin:4px 0;padding-left:18px}
+.qr{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.qr button{font-size:12.5px;padding:4px 10px;border-radius:999px}
+.starters{display:grid;gap:8px;margin-top:8px}
+.starter{border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;background:var(--panel)}
+.starter:hover{border-color:var(--accent)}
+.starter b{display:block;font-size:13px}.starter span{font-size:12px;color:var(--muted)}
+.composer{border-top:1px solid var(--line);padding:10px 12px;flex:none}
+.attached{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.att{font-size:11.5px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 8px;display:flex;gap:6px;align-items:center}
+.att i{font-style:normal;cursor:pointer;color:var(--muted)}
+textarea,input[type=text],input[type=number],input[type=password]{width:100%;font:inherit;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{resize:none;min-height:64px}
+.crow{display:flex;gap:6px;margin-top:6px;align-items:center}
+.crow .sp{flex:1}
+.pop{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--panel);max-height:300px;overflow:auto}
+.pop h4{margin:0 0 6px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.src{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12.5px}
+.k{font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--soft);color:var(--muted);font-family:var(--mono)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:5px 9px;font-size:12.5px}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+label.ck{display:flex;gap:8px;align-items:center;font-size:12.5px;margin:5px 0}
+.work{overflow-y:auto;padding:16px 18px;min-width:0}
+.sec{margin-bottom:18px}
+.sec-h{display:flex;align-items:center;gap:10px;margin:0 0 8px;flex-wrap:wrap}
+.sec-h h2{margin:0;font-size:15px}
+.sec-h .sp{flex:1}
+.muted{color:var(--muted)}.small{font-size:12px}.mono{font-family:var(--mono)}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.acc{background:var(--accent-soft);color:var(--accent)}
+.tabs{display:inline-flex;gap:4px;background:var(--soft);padding:3px;border-radius:9px}
+.tabs button{border:0;background:transparent;padding:4px 10px;font-size:12.5px}
+.tabs button.on{background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:600}
+.lanes{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px}
+.lane{flex:0 0 300px;background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:320px;overflow:hidden}
+.lane.off{opacity:.5}
+.lane.win{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok) inset}
+.lane.dq{border-color:var(--bad)}
+.lane-h{padding:10px 12px;border-bottom:1px solid var(--line)}
+.lane-h .nm{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13.5px}
+.lane-h .md{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.lane-h .st{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+.chips{display:flex;gap:3px;margin-top:7px}
+.fx{height:6px;flex:1;min-width:18px;border-radius:3px;background:var(--soft)}
+.fx.p{background:var(--ok)}.fx.f{background:var(--bad)}.fx.r{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.console{flex:1;background:var(--console);color:var(--console-ink);font-family:var(--mono);font-size:11px;line-height:1.5;padding:8px 10px;overflow-y:auto;max-height:300px;min-height:180px;white-space:pre-wrap;word-break:break-word}
+.console .begin{color:#fff;font-weight:700;display:block;margin-top:6px;border-top:1px dashed #333a46;padding-top:4px}
+.console .tool{color:#7cb7ff}.console .model{color:#c3a6ff}.console .stepstart{color:#fff}.console .checkpoint{color:#59d79b}
+.console .error{color:#ff7b84}.console .warn{color:#f3c066}.console .result{color:#59d79b;font-weight:600}.console .judge{color:#5fd4d4}.console .note{color:#9aa3b2}
+.console .idle{color:#6b7280}
+.lane-f{padding:7px 12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.scroll{overflow-x:auto}
+.cell{font-weight:700;font-size:11px;border-radius:5px;padding:2px 4px;text-align:center;min-width:42px;display:block;white-space:nowrap}
+.cell.p{background:var(--ok-soft);color:var(--ok)}.cell.f{background:var(--bad-soft);color:var(--bad)}.cell.w{background:var(--soft);color:var(--muted)}
+.bar{height:7px;border-radius:4px;background:var(--soft);overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;background:var(--accent)}.bar.dq i{background:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px}
+#tests td:nth-child(2){min-width:190px}
+@media (max-width:1300px){.grid2{grid-template-columns:1fr}}
+.slides{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.slide{aspect-ratio:16/9;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:hidden;cursor:pointer;position:relative}
+.slide:hover{border-color:var(--accent)}
+.slide .sx{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin:0 0 3px;font-weight:700}
+.slide h3{margin:0 0 6px;font-size:13.5px;line-height:1.25}
+.slide ul{margin:0;padding-left:15px;font-size:11px;color:var(--muted)}
+.slide .n{position:absolute;right:10px;bottom:6px;font-size:10px;color:var(--muted)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+#dlgSlide{width:min(900px,94vw)}
+.big{aspect-ratio:16/9;border:1px solid var(--line);border-radius:12px;padding:34px 44px;background:var(--panel);overflow:auto}
+.big .sx{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700}
+.big h2{font-size:30px;margin:6px 0 16px;line-height:1.15}
+.big li{font-size:18px;margin:6px 0}
+.quote{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.prov{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+.prov .g{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.empty{color:var(--muted);font-size:13px;padding:14px;text-align:center}
+body.client .work{display:none}
+body.client .app{grid-template-columns:1fr}
+body.client .chat{border-right:0;max-width:860px;width:100%;margin:0 auto}
+body.client .bubble{max-width:640px}
+.qform{display:grid;gap:10px;margin-top:8px}
+.qitem{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.qitem .qq{font-weight:600;font-size:13px}
+.qitem .qw{font-size:11.5px;color:var(--muted);margin:2px 0 6px}
+.qitem .tag{font-size:10.5px;color:var(--accent);margin-left:4px}
+.qitem.miss{border-color:var(--bad)}
+.multi label{display:inline-flex;gap:4px;align-items:center;font-size:12.5px;margin-right:10px}
+.tests-prev{margin:6px 0 2px;padding-left:16px;font-size:12px}
+.produced{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.produced button{font-size:10.5px;padding:2px 7px;border-radius:6px}
+.produced button.p{border-color:var(--ok);color:var(--ok)}.produced button.f{border-color:var(--bad);color:var(--bad)}
+.produced button.fin{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.cell.click{cursor:pointer}
+#dlgOut{width:min(1000px,95vw);max-height:90vh}
+.mini-slides{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.mini-slides .slide{cursor:default}
+.inline-deck{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.inline-deck .slide{padding:7px 8px}.inline-deck .slide h3{font-size:10.5px}.inline-deck .slide ul{font-size:8.5px}
+.viewseg button{font-size:12.5px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">mo<span>o</span>t</div>
+  <div class="tag">the hiring &amp; trust layer for agents: audition in sandboxes, hire with evidence, verify, recover</div>
+  <div class="sp"></div>
+  <a href="/how" class="small">How it works</a> <a href="/studio" class="small">Deck Studio</a>
+  <select id="history" title="Recent jobs"><option value="">Recent jobs…</option></select>
+  <span class="seg viewseg" id="viewSeg"><button data-v="client">Client view</button><button data-v="all" class="on">Behind the scenes</button></span>
+  <button id="btnNew">New job</button>
+  <button id="btnKeys">Keys &amp; models</button>
+</header>
+
+<div class="app">
+  <section class="chat">
+    <div class="msgs" id="msgs"></div>
+    <div class="composer">
+      <div id="popSources" class="pop" hidden>
+        <h4>Sources</h4>
+        <div id="library"></div>
+        <div class="crow"><input type="text" id="url" placeholder="Add a URL (fetched live)"><button id="btnUrl">Add</button></div>
+        <details style="margin-top:6px"><summary class="small muted" style="cursor:pointer">Paste or upload a document</summary>
+          <input type="text" id="docName" placeholder="Name" style="margin-top:6px">
+          <textarea id="docText" placeholder="Paste a startup brief, report text, markdown or HTML" style="margin-top:6px;min-height:80px"></textarea>
+          <div class="crow"><input type="file" id="docFile" accept=".txt,.md,.html,.htm"><button id="btnUpload">Add</button></div>
+        </details>
+      </div>
+      <div id="popOpts" class="pop" hidden>
+        <h4>Options</h4>
+        <div class="crow"><span class="small" style="width:90px">Budget USD</span><input type="number" id="budget" step="0.1" min="0" placeholder="blank → Moot asks"></div>
+        <div class="crow"><span class="small" style="width:90px">Optimise for</span><span class="seg" id="prio"><button data-v="quality" class="on">Quality</button><button data-v="cost_latency">Cost &amp; speed</button></span></div>
+        <label class="ck"><input type="checkbox" id="recurring"> Recurring, so follow-up updates are expected (adds a multi-step test)</label>
+        <label class="ck"><input type="checkbox" id="outage"> Simulate a provider outage for the hired agent mid-task</label>
+      </div>
+      <div class="attached" id="attached"></div>
+      <textarea id="input" placeholder="Describe the job, e.g. “Make a seed pitch deck from this brief” or “Compare FY2025 operating margins…”"></textarea>
+      <div class="crow">
+        <button id="btnSrc">＋ Sources</button><button id="btnOpts">Options</button>
+        <span class="sp"></span><button class="primary" id="btnSend">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="work" id="work">
+    <div class="sec">
+      <div class="sec-h"><h2>Candidate agents</h2><span class="small muted">Each agent runs in its own Moot sandbox: same tools, same tests, live trace.</span><span class="sp"></span><span class="tabs" id="famTabs"></span></div>
+      <div class="lanes" id="lanes"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2>Benchmark</h2><span class="small muted" id="benchHint"></span></div>
+      <div class="grid2">
+        <div class="card"><div class="small muted" style="margin-bottom:6px">Test suite: held-out inputs with hidden answer keys</div><div class="scroll" id="tests"></div></div>
+        <div class="card"><div class="small muted" style="margin-bottom:6px" id="boardTitle">Leaderboard from capability memory</div><div class="scroll" id="board"></div></div>
+      </div>
+    </div>
+    <div class="sec" id="deliverSec" hidden>
+      <div class="sec-h"><h2>Deliverable</h2><span class="sp"></span><span id="deliverMeta"></span></div>
+      <div id="deliverable"></div>
+    </div>
+  </section>
+</div>
+
+<dialog id="dlgSlide"><div id="bigSlide"></div><div class="crow" style="margin-top:10px"><button id="prevSlide">← Prev</button><span class="sp"></span><span id="slideIdx" class="small muted"></span><span class="sp"></span><button id="nextSlide">Next →</button><button id="closeSlide">Close</button></div></dialog>
+
+<dialog id="dlgOut"><div id="outBody"></div><div class="crow" style="justify-content:flex-end;margin-top:10px"><button id="closeOut">Close</button></div></dialog>
+
+<dialog id="dlgKeys" style="width:min(560px,92vw)">
+  <h2 style="margin:0 0 4px;font-size:16px">Model providers</h2>
+  <div class="small muted">Keys stay in the local server's memory, or set them in <span class="mono">moot/.env</span>. Changing a model changes the agent's version fingerprint, so its old evidence no longer counts.</div>
+  <div id="provs"></div>
+  <div class="crow" style="justify-content:flex-end"><button id="btnKeysClose">Cancel</button><button class="primary" id="btnKeysSave">Save</button></div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = v => v == null ? "—" : (v < 0 ? "-$" : "$") + (Math.abs(v) / 1e6).toLocaleString(undefined, {maximumFractionDigits: 1, minimumFractionDigits: 1}) + "M";
+const usd = v => "$" + (v ?? 0).toFixed((v ?? 0) >= 1 ? 2 : 4);
+const COLORS = {anthropic: "var(--claude)", openai: "var(--openai)", glm: "var(--glm)"};
+const FAM = {pitch_deck: "Pitch deck", financial_extraction: "Financial extraction"};
+const TERMINAL = ["COMPLETED", "PARTIAL", "FAILED", "NO_MATCH", "CANCELLED"];
+
+let AGENTS = [], LIB = [], BENCH = {}, sources = new Set(), selected = {}, priority = "quality", famView = "pitch_deck";
+let S = null, es = null;
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, {headers: {"Content-Type": "application/json"}, ...opts, body: opts.body ? JSON.stringify(opts.body) : undefined});
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error ? j.error.message : r.statusText);
+  return j;
+}
+
+// ===================================================== chat
+const STARTERS = [
+  {t: "Pitch deck for Moot", d: "Multi-step: plan → slides → self-check, judged by a cross-vendor panel",
+   task: "Make a pitch deck for Moot from this brief for hackathon judges. Max 10 slides.", src: ["file://sources/briefs/moot_brief.md"], fam: "pitch_deck", recurring: true},
+  {t: "Pitch deck for Kiln Carbon", d: "Brief with real numbers, so every figure must trace back to it",
+   task: "Create a 10-slide pitch deck for Kiln Carbon for seed investors.", src: ["file://sources/briefs/kiln_brief.md"], fam: "pitch_deck", recurring: true},
+  {t: "Compare operating margins", d: "Extraction from two annual reports, verified against held-out truth",
+   task: "Compare FY2025 operating margins of Halcyon Freight and Brightwater Labs. Never guess missing numbers.",
+   src: ["file://sources/halcyon_freight_fy2025.pdf.txt", "file://sources/brightwater_labs_fy2025.pdf.txt"], fam: "financial_extraction", recurring: true},
+  {t: "Cheap & fast web lookup", d: "Cost-weighted contract: a different agent may win",
+   task: "Quickly get Fernway Systems' FY2025 headline revenue from its investor site, cheap is fine. Never guess.",
+   src: ["https://ir.fernway.example/fy2025"], fam: "financial_extraction"},
+];
+
+function msg(who, html, extra = "") {
+  const el = document.createElement("div");
+  el.className = "msg " + who;
+  el.innerHTML = `<div class="av">${who === "moot" ? "m" : "you"}</div><div class="bubble">${html}${extra}</div>`;
+  $("#msgs").appendChild(el); $("#msgs").scrollTop = $("#msgs").scrollHeight;
+  return el;
+}
+const red = t => `<span style="color:var(--bad)">${esc(t)}</span>`;
+function resetChat() {
+  $("#msgs").innerHTML = "";
+  msg("moot", `Hi, I'm <b>Moot</b>. Tell me the job and attach its sources. I'll audition candidate agents in sandboxes on held-out tests, hire the best qualified one, verify its work and recover if it fails.
+    <div class="starters">${STARTERS.map((s, i) => `<div class="starter" data-i="${i}"><b>${esc(s.t)}</b><span>${esc(s.d)}</span></div>`).join("")}</div>`);
+}
+$("#msgs").addEventListener("click", e => {
+  const st = e.target.closest(".starter");
+  if (st) { const s = STARTERS[st.dataset.i]; $("#input").value = s.task; sources = new Set(s.src); $("#recurring").checked = !!s.recurring;
+    setPriority(/cheap|fast|quick/i.test(s.task) ? "cost_latency" : "quality"); setFam(s.fam); renderAttached(); renderLibrary(); $("#input").focus(); return; }
+  const q = e.target.closest("[data-ans]");
+  if (q) return answerQuestion(q.dataset.q, q.dataset.ans);
+  if (e.target.id === "btnApprove") return approve();
+  if (e.target.id === "btnPresent") { DECK = S.job.result.deliverables[0].deck; slideI = 0; showSlide(); return $("#dlgSlide").showModal(); }
+  if (e.target.classList.contains("bts")) setView("all");
+  if (e.target.dataset.goto) { e.preventDefault(); document.getElementById(e.target.dataset.goto).scrollIntoView({behavior: "smooth"}); }
+});
+
+$("#btnSend").onclick = send;
+$("#input").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+const famGuess = t => /pitch|deck|slides|presentation/i.test(t) ? "pitch_deck" : "financial_extraction";
+
+async function send() {
+  const text = $("#input").value.trim(); if (!text) return;
+  if (S && S.job.status === "CLARIFICATION_REQUIRED" && S.job.benchmark_preview) {
+    msg("user", esc(text)); $("#input").value = "";
+    return msg("moot", "Use the form above: every question has a default, so you can just press <b>Start auditions</b>.");
+  }
+  if (S && S.job.status === "CLARIFICATION_REQUIRED" && S.job.questions.length) {   // typed answer to a pending question
+    msg("user", esc(text)); $("#input").value = "";
+    const q = S.job.questions[0];
+    let v = text;
+    if (q.type === "number") { const m = text.match(/\d+(\.\d+)?/); if (!m) return msg("moot", "I need a number for that, e.g. <b>1.50</b>."); v = m[0]; }
+    else { const o = q.options.find(o => text.toLowerCase().includes(o.toLowerCase().split(" ")[0])); if (!o) return msg("moot", `Pick one of: ${q.options.map(esc).join(", ")}`); v = o; }
+    return answerQuestion(q.id, v, true);
+  }
+  if (S && /^(why|explain)/i.test(text) && S.decision) { msg("user", esc(text)); $("#input").value = ""; return msg("moot", esc(S.decision.rationale)); }
+  if (!sources.size) return msg("moot", "Attach at least one source first (＋ Sources): a startup brief for a deck, or a report/URL for extraction.");
+  msg("user", esc(text) + `<div class="small" style="opacity:.85;margin-top:4px">${[...sources].map(s => "📎 " + esc(s.split("/").pop())).join(" ")}</div>`);
+  $("#input").value = "";
+  const thinking = msg("moot", '<span class="muted">Reading the task…</span>');
+  try {
+    const agents = Object.values(selected).flatMap(s => [...s]);
+    const job = await api("/api/jobs", {method: "POST", body: {task: text, sources: [...sources], agents, budget: $("#budget").value,
+      priority, recurring: $("#recurring").checked, simulate_outage: $("#outage").checked}});
+    thinking.remove();
+    openJob(job, true);
+  } catch (e) { thinking.querySelector(".bubble").innerHTML = red(e.message); }
+  loadHistory();
+}
+
+function contractMsg(j) {
+  const c = j.contract, intake = j.intake || {};
+  let h = `I read this as a <b>${esc(FAM[j.task_family] || j.task_family)}</b> job <span class="small muted">(intake: ${esc(intake.intake_by || "?")})</span>.`;
+  if (intake.note) h += `<div class="small" style="color:var(--warn)">${esc(intake.note)}</div>`;
+  if (c) h += `<div class="small" style="margin-top:6px">Contract <span class="mono">${esc(c.contract_id)}</span> · budget $${c.constraints.max_total_cost_usd}${c.constraints.audience ? " · " + esc(c.constraints.audience) : ""} · ${esc(c.constraints.priority)}</div>
+    <details class="small"><summary style="cursor:pointer">Acceptance criteria</summary><ul>${c.acceptance_criteria.map(a => `<li>${esc(a)}</li>`).join("")}</ul></details>`;
+  return h;
+}
+function questionHtml(q) {
+  return q.type === "enum" ? `<div class="qr">${q.options.map(o => `<button data-q="${q.id}" data-ans="${esc(o)}">${esc(o.replace(/_/g, " "))}</button>`).join("")}</div>`
+    : `<div class="qr">${[0.5, 1, 2].map(v => `<button data-q="${q.id}" data-ans="${v}">$${v.toFixed(2)}</button>`).join("")}<span class="small muted" style="align-self:center">or type an amount</span></div>`;
+}
+function benchmarkForm(j) {
+  const prev = j.benchmark_preview || [];
+  const ctl = q => {
+    if (q.type === "number") return `<input type="number" step="0.1" min="0" data-bq="${q.id}" value="${q.default ?? ""}" style="max-width:140px">`;
+    if (q.type === "multi") return `<div class="multi" data-bq="${q.id}" data-type="multi">${q.options.map(o => `<label><input type="checkbox" value="${esc(o)}" ${(q.default || []).includes(o) ? "checked" : ""}>${esc(o.replace(/_/g, " "))}</label>`).join("")}</div>`;
+    return `<span class="seg" data-bq="${q.id}" data-type="enum">${q.options.map(o => `<button data-v="${esc(o)}" class="${o === q.default ? "on" : ""}">${esc(o.replace(/_/g, " "))}</button>`).join("")}</span>`;
+  };
+  const el = msg("moot", `I've planned the benchmark for this job. Each candidate will run these tests in its own sandbox before I hire anyone:
+    <ol class="tests-prev">${prev.map(t => `<li><b>${esc(short(t.id))}</b>: ${esc(t.description)}</li>`).join("")}</ol>
+    These answers decide how candidates are tested and what the result must look like. Defaults are filled in; your budget also authorizes the hire.
+    <div class="qform">${j.questions.map(q => `<div class="qitem" id="qi-${q.id}"><div class="qq">${esc(q.question)}${q.settled_by ? `<span class="tag">from ${esc(q.settled_by)}</span>` : ""}${q.origin !== "benchmark" ? `<span class="tag">asked by ${esc(q.origin)}</span>` : ""}</div>
+      <div class="qw">${esc(q.why)}${q.tests?.length && q.tests[0] ? ` · shapes: ${q.tests.map(t => esc(short(t))).join(", ")}` : ""}</div>${ctl(q)}</div>`).join("")}</div>
+    <div class="qr"><button class="primary" id="btnStart">Start auditions →</button></div>
+    ${j.designer_note ? `<div class="small muted" style="margin-top:4px">${esc(j.designer_note)}</div>` : ""}`);
+  el.querySelectorAll(".seg[data-bq]").forEach(seg => seg.onclick = e => { if (!e.target.dataset.v) return; seg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === e.target)); });
+  el.querySelector("#btnStart").onclick = async () => {
+    const answers = {};
+    el.querySelectorAll("[data-bq]").forEach(c => {
+      const id = c.dataset.bq;
+      answers[id] = c.dataset.type === "enum" ? c.querySelector("button.on")?.dataset.v : c.dataset.type === "multi" ? [...c.querySelectorAll("input:checked")].map(i => i.value) : c.value;
+    });
+    try {
+      const r = await api(`/api/jobs/${S.job.job_id}/answers`, {method: "POST", body: answers});
+      el.querySelectorAll(".qitem").forEach(q => q.classList.remove("miss"));
+      if (r.status === "CLARIFICATION_REQUIRED") { (r.outstanding || []).forEach(id => $("#qi-" + id)?.classList.add("miss")); return msg("moot", "Please fill in the highlighted question."); }
+      el.querySelector("#btnStart").disabled = true;
+      S.job = {...S.job, ...r};
+      const sum = j.questions.map(q => `${esc(q.question.replace(/\?$/, ""))}: <b>${esc(Array.isArray(answers[q.id]) ? (answers[q.id].join(", ") || "none") : String(answers[q.id]).replace(/_/g, " "))}</b>`).join("<br>");
+      msg("user", `<span class="small">${sum}</span>`);
+      S.job = await api("/api/jobs/" + S.job.job_id);
+      msg("moot", contractMsg(S.job));
+      startEvaluate();
+    } catch (e) { msg("moot", red(e.message)); }
+  };
+}
+function askNext(j, first) {
+  if (j.benchmark_preview && first) return benchmarkForm(j);
+  const q = j.questions[0];
+  msg("moot", `${first ? "Before I spend anything: " : "Thanks. Next: "}<b>${esc(q.question)}</b><div class="small muted">${esc(q.why)}</div>`, questionHtml(q));
+}
+async function answerQuestion(qid, value, typed) {
+  if (!typed) msg("user", esc(value));
+  try {
+    S.job = await api(`/api/jobs/${S.job.job_id}/answers`, {method: "POST", body: {[qid]: value}});
+    if (S.job.status === "CLARIFICATION_REQUIRED") return askNext(S.job, false);
+    msg("moot", contractMsg(S.job));
+    startEvaluate();
+  } catch (e) { msg("moot", red(e.message)); }
+}
+
+// ===================================================== job lifecycle
+async function openJob(job, fresh) {
+  if (es) es.close();
+  const live = fresh || (await api(`/api/jobs/${job.job_id}/eventcount`)).count > 0;  // server still holds this job's event log
+  history.replaceState(null, "", "#job=" + job.job_id);
+  S = {job, plan: null, cand: null, auditions: {}, reused: {}, traces: {}, running: {}, decision: job.decision, hired: null, finalShown: false};
+  setFam(job.task_family || "financial_extraction");
+  if (!fresh) { resetChat(); msg("user", esc(job.objective)); }
+  msg("moot", contractMsg(job));
+  if (job.status === "CLARIFICATION_REQUIRED") askNext(job, true);
+  es = new EventSource(`/api/jobs/${job.job_id}/events`);
+  es.onmessage = m => onEvent(JSON.parse(m.data));
+  if (job.status === "READY") startEvaluate();
+  else if (job.evaluation_run_id) api("/api/runs/" + job.evaluation_run_id).then(r => { hydrate(r); renderAll(); if (!live) replay(job); });
+  S.replaying = !fresh && live;
+  renderAll();
+}
+function hydrate(r) {
+  S.plan = r.plan;
+  r.candidates.forEach(c => { if (c.reused) S.reused[c.worker_id] = "evidence reused from memory";
+    (c.fixtures || []).forEach(f => (S.auditions[c.worker_id] ||= {})[f.fixture_id] = {passed: f.pass, summary: f.summary, quality: f.quality,
+      output: f.output, checks: f.checks, field_checks: f.field_checks, status: f.status, judge_panel: f.judge_panel}); });
+  S.cand = {eligible: r.candidates.map(c => ({worker_id: c.worker_id})), excluded: []};
+}
+function replay(job) {
+  if (S.decision) decisionMsg(S.decision);
+  (job.result?.attempts || []).forEach(a => msg("moot", a.status === "completed" ? `<b>${esc(a.worker_id)}</b> delivered (${usd(a.cost_usd)}).` : `⛔ <b>${esc(a.worker_id)}</b> failed: ${esc(a.error)}`));
+  if (TERMINAL.includes(job.status)) { S.finalShown = true; finalMsg(job); }
+}
+async function startEvaluate() {
+  try {
+    S.cand = await api(`/api/jobs/${S.job.job_id}/candidates`); S.plan = S.cand.evaluation_plan;
+    const sel = S.job.selected_agents;
+    const el = S.cand.eligible.filter(e => !sel || sel.includes(e.worker_id));
+    const ex = S.cand.excluded.filter(x => !sel || sel.includes(x.worker_id));
+    msg("moot", `Auditioning <b>${el.length}</b> agent${el.length === 1 ? "" : "s"} on <b>${S.plan.fixtures.length}</b> benchmark tests, each in its own sandbox. <a href="#" data-goto="lanes">Watch them work →</a>` +
+      (ex.length ? `<div class="small muted">Skipped: ${ex.map(x => `${esc(x.worker_id)} (${esc(x.reason)})`).join("; ")}</div>` : "") +
+      (S.job.task_family === "pitch_deck" && S.plan.judge?.length ? `<div class="small muted">Quality judge panel: ${S.plan.judge.map(esc).join(", ")} (qualitative)</div>` : ""));
+    renderAll();
+    await api(`/api/jobs/${S.job.job_id}/evaluate`, {method: "POST", body: {}});
+  } catch (e) { msg("moot", red(e.message)); }
+}
+async function approve() {
+  const cap = parseFloat($("#cap")?.value || "0");
+  document.querySelectorAll("#btnApprove").forEach(b => b.disabled = true);
+  msg("user", `Approved, spend cap $${cap.toFixed(2)}`);
+  try { await api(`/api/jobs/${S.job.job_id}/approve`, {method: "POST", body: {spend_cap_usd: cap}}); } catch (e) { msg("moot", red(e.message)); }
+}
+async function refresh() {
+  if (!S) return;
+  S.job = await api("/api/jobs/" + S.job.job_id); S.decision = S.job.decision || S.decision;
+  if (TERMINAL.includes(S.job.status) && !S.finalShown) { S.finalShown = true; finalMsg(S.job); }
+  renderAll(); loadHistory(); loadBench();
+}
+function decisionMsg(d) {
+  const top = d.ranking[0], dq = d.ranking.filter(r => !r.qualified);
+  msg("moot", (d.recommended ? `🏆 <b>${esc(d.recommended)}</b> wins with score <b>${top.score.toFixed(3)}</b>.` : "<b>No agent passed every hard gate,</b> so I won't hire anyone.") +
+    `<div class="small" style="margin-top:4px">${esc(d.rationale)}</div>` +
+    (dq.length ? `<div class="small" style="color:var(--bad);margin-top:4px">Disqualified: ${dq.map(r => `${esc(r.worker_id)} (${esc(r.failed_gates.join(", "))})`).join("; ")}</div>` : "") +
+    `<div class="small muted" style="margin-top:4px">${esc(d.caveat)}</div>`);
+}
+function productHtml(j) {
+  const d = j.result.deliverables;
+  if (!d.length) return "";
+  if (j.task_family === "pitch_deck") {
+    const deck = d[0].deck;
+    return `<div style="margin-top:8px;font-weight:600">${esc(deck.title)} <span class="small muted">· ${deck.slides.length} slides by ${esc(d[0].worker_id)}</span></div>
+      ${deckHtml({slides: deck.slides.slice(0, 6)}, "inline-deck")}<div class="qr"><button id="btnPresent">▶ Present deck</button></div>`;
+  }
+  const hasOp = d.some(x => "operating_income" in x.fields);
+  return `<table style="margin-top:8px;font-size:12px"><tr><th>Company</th><th>Revenue</th>${hasOp ? "<th>Op. income</th><th>Margin</th>" : ""}</tr>${d.map(x => { const f = x.fields, rev = f.revenue?.value, op = f.operating_income?.value;
+    return `<tr><td>${esc(f.company?.value)}</td><td>${money(rev)}</td>${hasOp ? `<td>${money(op)}</td><td>${rev && op != null ? (100 * op / rev).toFixed(1) + "%" : "—"}</td>` : ""}</tr>`; }).join("")}</table>`;
+}
+function finalMsg(j) {
+  const r = j.result, c = r.costs;
+  msg("moot", (j.status === "COMPLETED" ? "✅ <b>Delivered.</b>" : j.status === "PARTIAL" ? "⚠️ <b>Partially delivered.</b>" : `❌ <b>${esc(j.status)}</b>`) +
+    ` ${r.deliverables.map(d => `<span class="pill ${d.verification === "verified" ? "ok" : "warn"}">${esc(d.verification.replace("_", " "))}</span>`).join(" ")}
+    <div class="small" style="margin-top:4px">Spend: auditions ${usd(c.evaluation_usd)} + execution ${usd(c.execution_usd)} = <b>${usd(c.total_usd)}</b> (estimates)</div>
+    ${productHtml(j)}
+    ${r.deliverables.length ? `<div class="qr"><button data-goto="deliverSec" class="bts">How it was made →</button></div>` : ""}
+    <details class="small"><summary style="cursor:pointer">Limitations</summary><ul>${r.limitations.map(l => `<li>${esc(l)}</li>`).join("")}</ul></details>`);
+}
+
+function onEvent(ev) {
+  switch (ev.kind) {
+    case "idle": return refresh();
+    case "busy": return;
+    case "trace": {
+      const w = ev.worker_id;
+      if (w === "moot-verifier") { if (ev.tkind === "judge") msg("moot", `<span class="small">⚖️ ${esc(ev.text)}</span>`); return; }
+      (S.traces[w] ||= []).push(ev); if (S.traces[w].length > 500) S.traces[w].shift();
+      if (ev.tkind === "begin") S.running[w] = ev.fixture_id || "job";
+      appendTrace(w, ev); renderLaneHeader(w); return;
+    }
+    case "auto_approved": return msg("moot", `✔ Hiring <b>${esc(ev.recommendation)}</b>: estimated ${usd(ev.estimate_usd)}, within the ${usd(ev.remaining_usd)} left of your budget. No approval needed.`);
+    case "audition": (S.auditions[ev.worker_id] ||= {})[ev.fixture_id] = {passed: ev.passed, summary: ev.summary, quality: ev.quality,
+      output: ev.output, checks: ev.checks, field_checks: ev.field_checks, status: ev.status};
+      delete S.running[ev.worker_id]; renderLaneHeader(ev.worker_id); renderTests(); return;
+    case "reused": S.reused[ev.worker_id] = ev.detail; msg("moot", `<span class="small">♻️ Reusing evidence for <b>${esc(ev.worker_id)}</b>: ${esc(ev.detail)}</span>`); return renderAll();
+    case "decision": S.decision = ev.decision; decisionMsg(ev.decision); return renderAll();
+    case "approval_required": if (S.job.status !== "AWAITING_APPROVAL") return; return msg("moot", `Hiring <b>${esc(ev.recommendation)}</b> will cost about <b>${usd(ev.estimate_usd)}</b>, above the auto-approve limit.`,
+        `<div class="crow"><span class="small">Cap $</span><input type="number" id="cap" step="0.05" value="${Math.max(0.3, Math.ceil(ev.estimate_usd * 3 * 100) / 100)}" style="width:90px"><button class="primary" id="btnApprove">Approve &amp; hire</button></div>`);
+    case "state":
+      S.job.status = ev.to_state;
+      if (ev.to_state === "ASSIGNED") S.hired = (ev.why.match(/(?:assigned|handoff) to (\S+)/) || [])[1] || S.hired;
+      return renderAll();
+    case "attempt":
+      if (ev.phase === "started") msg("moot", `🛠 <b>${esc(ev.worker_id)}</b> is working on <span class="mono small">${esc(ev.source.split("/").pop())}</span>.`);
+      else if (ev.status !== "completed") msg("moot", `⛔ <b>${esc(ev.worker_id)}</b> failed: ${esc(ev.error)}`);
+      return;
+    case "checkpoint": return msg("moot", `<span class="small">💾 ${ev.accepted ? `Checkpoint from <b>${esc(ev.worker_id)}</b> accepted (${esc(ev.steps.join(", "))})` : "Checkpoint"}: ${esc(ev.detail)}</span>`);
+    case "handoff": return msg("moot", `🔁 <b>Recovery:</b> handing off to <b>${esc(ev.to_worker)}</b>${ev.preserved ? `, keeping ${ev.preserved} verified deliverable(s)` : ""}.`);
+    case "verification": {
+      const failed = ev.checks.filter(c => !c.pass);
+      return msg("moot", `🔎 Verifier: <span class="pill ${ev.tier === "rejected" ? "bad" : ev.tier === "verified" ? "ok" : "warn"}">${esc(ev.tier.replace("_", " "))}</span> ${ev.checks.length - failed.length}/${ev.checks.length} checks
+        ${failed.map(c => `<div class="small" style="color:var(--bad)">✗ ${esc(c.check)}: ${esc(c.detail)}</div>`).join("")}
+        ${ev.warnings.map(w => `<div class="small" style="color:var(--warn)">⚠ ${esc(w)}</div>`).join("")}
+        ${ev.quality && ev.quality.mean ? `<div class="small">Judged quality ${ev.quality.mean.toFixed(1)}/5 <span class="muted">(${esc(ev.quality.note)})</span></div>` : ""}`);
+    }
+    case "error": return msg("moot", red(ev.message));
+  }
+}
+
+// ===================================================== lanes
+const jobInView = () => S && S.cand && S.job.task_family === famView;
+function laneAgents() {
+  let list = AGENTS.filter(a => a.families.includes(famView));
+  if (jobInView()) {
+    const sel = S.job.selected_agents;
+    const ids = S.cand.eligible.map(e => e.worker_id).filter(id => !sel || sel.includes(id));
+    list = list.filter(a => ids.includes(a.worker_id));
+  }
+  return list;
+}
+function laneStatus(a) {
+  const id = a.worker_id;
+  if (!jobInView()) return a.available ? (selected[famView]?.has(id) ? ["will audition", "acc"] : ["not included", ""]) :
+    [/rejected/.test(a.unavailable_reason || "") ? "key rejected" : "needs key", "warn"];
+  const rank = S.decision?.ranking.find(r => r.worker_id === id);
+  if (S.job.result?.deliverables?.some(d => d.worker_id === id)) return ["delivered", "ok"];
+  if (S.hired === id && !TERMINAL.includes(S.job.status)) return ["hired · working", "acc"];
+  if (S.job.result?.attempts?.some(x => x.worker_id === id && x.status !== "completed")) return ["failed on job", "bad"];
+  if (rank) return rank.qualified ? [S.decision.recommended === id ? `winner · ${rank.score.toFixed(3)}` : `qualified · ${rank.score.toFixed(3)}`, "ok"] : ["disqualified", "bad"];
+  if (S.reused[id]) return ["evidence reused", "acc"];
+  if (S.running[id]) return ["auditioning…", "acc"];
+  return ["queued", ""];
+}
+function renderLanes() {
+  const list = laneAgents();
+  $("#lanes").innerHTML = list.length ? list.map(a => {
+    const color = COLORS[a.provider] || "var(--base)";
+    const off = !a.available || (!jobInView() && !selected[famView]?.has(a.worker_id));
+    const rank = S?.decision && jobInView() ? S.decision.ranking.find(r => r.worker_id === a.worker_id) : null;
+    return `<div class="lane ${off ? "off" : ""} ${rank && S.decision.recommended === a.worker_id ? "win" : ""} ${rank && !rank.qualified ? "dq" : ""}">
+      <div class="lane-h"><div class="nm"><span class="dot" style="background:${color}"></span>${esc(a.display.replace(/ \(.*\)$/, ""))}
+        ${!jobInView() && a.available ? `<span style="flex:1"></span><input type="checkbox" data-sel="${a.worker_id}" ${selected[famView]?.has(a.worker_id) ? "checked" : ""} title="Include in auditions">` : ""}</div>
+        <div class="md">${esc(a.kind === "llm" ? a.model : "deterministic · " + a.tools[0])}</div>
+        <div class="st" id="st-${a.worker_id}"></div><div class="chips" id="chips-${a.worker_id}"></div><div class="produced" id="prod-${a.worker_id}"></div></div>
+      <div class="console" id="con-${a.worker_id}"></div>
+      <div class="lane-f" id="foot-${a.worker_id}"></div></div>`;
+  }).join("") : `<div class="empty">No agents registered for this task family.</div>`;
+  list.forEach(a => {
+    renderLaneHeader(a.worker_id);
+    const con = $("#con-" + a.worker_id), tr = (jobInView() && S.traces[a.worker_id]) || [];
+    con.innerHTML = tr.length ? "" : `<span class="idle">${esc(a.available ? (a.description || "idle") : a.unavailable_reason)}</span>`;
+    tr.forEach(ev => appendTrace(a.worker_id, ev, true)); con.scrollTop = con.scrollHeight;
+  });
+}
+function renderLaneHeader(id) {
+  const a = AGENTS.find(x => x.worker_id === id); if (!a || !$("#st-" + id)) return;
+  const [txt, cls] = laneStatus(a);
+  const fx = jobInView() ? S.plan?.fixtures || [] : [], res = (jobInView() && S.auditions[id]) || {};
+  const done = Object.values(res);
+  $("#st-" + id).innerHTML = `<span class="pill ${cls}">${esc(txt)}</span><span class="small muted">${done.length ? `${done.filter(r => r.passed).length}/${fx.length} tests passed` : ""}</span>`;
+  $("#chips-" + id).innerHTML = jobInView() && !S.reused[id] ? fx.map(f => `<span class="fx ${res[f] ? (res[f].passed ? "p" : "f") : S.running[id] === f ? "r" : ""}" title="${esc(f)}${res[f] ? ": " + esc(res[f].summary) : ""}"></span>`).join("") : "";
+  const fin = jobInView() ? (S.job.result?.deliverables || []).filter(d => d.worker_id === id) : [];
+  $("#prod-" + id).innerHTML = (jobInView() ? fx.filter(f => res[f]).map(f => `<button class="${res[f].passed ? "p" : "f"}" data-out="${id}|${f}" title="${esc(res[f].summary)}">${res[f].output ? "📄" : "∅"} ${esc(short(f))}</button>`).join("") : "")
+    + fin.map((d, i) => `<button class="fin" data-final="${i}">📦 final deliverable</button>`).join("");
+  const tr = (jobInView() && S.traces[id]) || [], mt = tr.filter(t => t.tkind === "model");
+  const cost = mt.map(t => parseFloat((t.text.match(/\$([\d.]+)/) || [])[1] || 0)).reduce((x, y) => x + y, 0);
+  const tok = mt.map(t => (t.text.match(/([\d,]+) in \/ ([\d,]+) out/) || []).slice(1).reduce((x, n) => x + +n.replace(/,/g, ""), 0)).reduce((x, y) => x + y, 0);
+  $("#foot-" + id).innerHTML = `<span>${a.kind === "llm" ? `${tok.toLocaleString()} tok · ${usd(cost)}` : "offline tools · no model spend"}</span><span>${tr.length} events</span>`;
+}
+function appendTrace(id, ev, bulk) {
+  const con = $("#con-" + id); if (!con) return;
+  if (con.querySelector(".idle")) con.innerHTML = "";
+  const line = document.createElement("span");
+  line.className = ev.tkind;
+  const prefix = ev.tkind === "begin" ? (ev.phase === "job" ? "▶ REAL JOB · " : `▶ ${(ev.fixture_id || "").replace(/^fx_(pdf|web|deck)_/, "")} · `) : ev.tkind === "stepstart" ? "» " : "  ";
+  line.textContent = prefix + ev.text + "\n";
+  con.appendChild(line);
+  if (!bulk) con.scrollTop = con.scrollHeight;
+}
+$("#lanes").addEventListener("click", e => {
+  const b = e.target.closest("[data-out]"); if (b) { const [w, f] = b.dataset.out.split("|"); return showOutput(w, f); }
+  const fin = e.target.closest("[data-final]"); if (fin) return document.getElementById("deliverSec").scrollIntoView({behavior: "smooth"});
+});
+$("#tests").addEventListener("click", e => { const c = e.target.closest("[data-out]"); if (c) { const [w, f] = c.dataset.out.split("|"); showOutput(w, f); } });
+$("#lanes").addEventListener("change", e => { const id = e.target.dataset.sel; if (!id) return;
+  const set = (selected[famView] ||= new Set()); e.target.checked ? set.add(id) : set.delete(id); renderLanes(); });
+
+// ===================================================== benchmark
+const short = id => id.replace(/^fx_(pdf|web|deck)_/, "").replace(/_/g, " ");
+function renderTests() {
+  const b = BENCH[famView]; if (!b) return;
+  const live = jobInView() ? laneAgents().map(a => a.worker_id).filter(id => S.auditions[id] || S.running[id] || S.reused[id]) : [];
+  const planned = jobInView() && S.plan ? new Set(S.plan.fixtures) : null;
+  $("#tests").innerHTML = `<table><tr><th>Test</th><th>What it checks</th>${live.map(id => `<th>${esc(id.replace(/_(analyst|deck)$/, ""))}</th>`).join("")}</tr>
+    ${b.tests.filter(t => !planned || planned.has(t.id)).map(t => `<tr><td><b>${esc(short(t.id))}</b><div class="small muted">${esc(t.stage)} · ${esc(t.description || "")}</div></td>
+      <td class="small">${esc(t.checks || "")}</td>
+      ${live.map(id => { const r = (S.auditions[id] || {})[t.id]; return `<td title="${esc(r ? r.summary + " (click to see the output)" : "")}"><span class="cell ${r ? (r.passed ? "p" : "f") + " click" : "w"}" ${r ? `data-out="${id}|${t.id}"` : ""}>${r ? (r.passed ? "PASS" : "FAIL") + (r.quality ? ` · ${r.quality.toFixed(1)}★` : "") : S.reused[id] ? "memory" : "…"}</span></td>`; }).join("")}</tr>`).join("")}</table>`;
+  $("#benchHint").textContent = `${b.label} · harness ${b.evaluator_version} · answers are hidden from agents`;
+}
+function renderBoard() {
+  const b = BENCH[famView]; if (!b) return;
+  if (jobInView() && S.decision) {
+    const d = S.decision, comps = Object.keys(d.weights);
+    $("#boardTitle").textContent = "This job's ranking: hard gates first, then a weighted score";
+    $("#board").innerHTML = `<table><tr><th>Agent</th><th>Gates</th><th>Score</th>${comps.map(k => `<th>${esc(k.replace("_", " "))}<div style="font-weight:400">w ${d.weights[k]}</div></th>`).join("")}</tr>
+      ${d.ranking.map((r, i) => `<tr><td>${i === 0 && r.qualified ? "🏆 " : ""}<b>${esc(r.worker_id)}</b><div class="small muted">${esc(r.evidence_source)}</div></td>
+        <td>${r.qualified ? '<span class="pill ok">pass</span>' : `<span class="pill bad">fail</span><div class="small" style="color:var(--bad)">${esc(r.failed_gates.join(", "))}</div>`}</td>
+        <td><div class="bar ${r.qualified ? "" : "dq"}"><i style="width:${Math.round(r.score * 100)}%"></i></div><span class="small">${r.score.toFixed(3)}</span></td>
+        ${comps.map(k => `<td class="small">${r.components[k].toFixed(2)}</td>`).join("")}</tr>`).join("")}</table>`;
+    return;
+  }
+  $("#boardTitle").textContent = "Leaderboard from capability memory (latest audition per agent and version)";
+  $("#board").innerHTML = b.leaderboard.length ? `<table><tr><th>Agent</th><th>Taxonomy</th><th>Gates</th><th>Score</th><th>Checks</th><th>Version</th></tr>
+    ${b.leaderboard.map(r => `<tr><td><b>${esc(r.worker_id)}</b></td><td class="small mono">${esc(r.taxonomy)}</td>
+      <td>${r.qualified ? '<span class="pill ok">pass</span>' : `<span class="pill bad" title="${esc(r.failed_gates.join(", "))}">fail</span><div class="small muted">${esc(r.failed_gates.join(", "))}</div>`}</td>
+      <td class="small">${r.score.toFixed(3)}</td><td class="small">${esc(r.checks)}</td>
+      <td class="small">${r.current_version ? `current · ${r.age_minutes}m ago` : '<span style="color:var(--warn)">outdated</span>'}</td></tr>`).join("")}</table>`
+    : `<div class="empty">No evidence yet. Every audition is recorded here.</div>`;
+}
+
+// ===================================================== audition output viewer
+function deckHtml(deck, cls = "mini-slides") {
+  return `<div class="${cls}">${(deck.slides || []).map((s, i) => `<div class="slide"><div class="sx">${esc((s.section || "").replace("_", " "))}</div><h3>${esc(s.title)}</h3><ul>${(s.bullets || []).slice(0, 5).map(b => `<li>${esc(b)}</li>`).join("")}</ul><span class="n">${i + 1}</span></div>`).join("")}</div>`;
+}
+function fieldsHtml(rec, fcs) {
+  const by = Object.fromEntries((fcs || []).map(c => [c.field, c]));
+  return `<table><tr><th>Field</th><th>Agent's value</th><th>Answer key</th><th>Check</th><th>Agent's citation</th></tr>${Object.entries(rec.fields || {}).map(([f, e]) => { const c = by[f];
+    const fmt = v => typeof v === "number" && f !== "fiscal_year" ? money(v) : v ?? "null";
+    return `<tr><td><b>${esc(f)}</b></td><td>${esc(fmt(e.value))}${e.value == null && e.reason ? `<div class="small muted">${esc(e.reason)}</div>` : ""}${e.revised_from != null ? `<div class="small muted">revised from ${esc(fmt(e.revised_from))}</div>` : ""}</td>
+      <td class="small">${c ? esc(fmt(c.expected)) : "—"}</td><td>${c ? `<span class="pill ${c.pass ? "ok" : "bad"}">${esc(c.kind)}</span>` : ""}</td>
+      <td><div class="quote">${e.citation ? esc(e.citation.quote) : "—"}</div><div class="small muted">${e.citation ? esc(e.citation.locator || "") : ""}</div></td></tr>`; }).join("")}</table>`;
+}
+function showOutput(worker, fid) {
+  const r = (S.auditions[worker] || {})[fid]; if (!r) return;
+  const t = (BENCH[famView]?.tests || []).find(x => x.id === fid) || {};
+  const out = r.output;
+  $("#outBody").innerHTML = `<div class="crow" style="margin:0 0 6px"><b style="font-size:15px">${esc(worker)}</b><span class="muted">· test <b>${esc(short(fid))}</b>: ${esc(t.description || "")}</span><span class="sp"></span><span class="pill ${r.passed ? "ok" : "bad"}">${r.passed ? "PASS" : "FAIL"}</span></div>
+    <div class="small muted">Checks: ${esc(t.checks || "")}</div>
+    <div class="small" style="margin:6px 0">${esc(r.summary)}</div>
+    ${r.checks?.length ? `<div class="small" style="margin-bottom:8px">${r.checks.map(c => `<span class="pill ${c.pass ? "ok" : "bad"}" title="${esc(c.detail)}">${c.pass ? "✓" : "✗"} ${esc(c.check)}</span>`).join(" ")}</div>` : ""}
+    ${r.judge_panel?.length ? `<div class="small" style="margin-bottom:8px">Judges: ${r.judge_panel.map(p => `<b>${esc(p.judge)}</b> ${p.mean.toFixed(1)}/5 “${esc(p.rationale)}”`).join(" · ")}</div>` : ""}
+    <div style="max-height:60vh;overflow:auto">${!out ? `<div class="empty">No output: ${r.status === "failed" ? "the agent reported an explicit failure (expected for the outage test)." : "nothing produced."}</div>`
+      : out.deck ? `<div style="font-weight:600;margin-bottom:6px">${esc(out.deck.title)}</div>` + deckHtml(out.deck) : fieldsHtml(out, r.field_checks)}</div>`;
+  $("#dlgOut").showModal();
+}
+$("#closeOut").onclick = () => $("#dlgOut").close();
+
+// ===================================================== deliverable
+let DECK = null, slideI = 0;
+function renderDeliverable() {
+  const ds = (jobInView() || (S && S.job.task_family === famView)) ? S.job.result?.deliverables || [] : [];
+  $("#deliverSec").hidden = !ds.length;
+  if (!ds.length) return;
+  if (S.job.task_family === "pitch_deck") {
+    const d = ds[0], q = d.quality; DECK = d.deck;
+    $("#deliverMeta").innerHTML = `<span class="pill ${d.verification === "verified" ? "ok" : "warn"}">${esc(d.verification.replace("_", " "))}</span> <span class="small muted">by ${esc(d.worker_id)}</span>`;
+    $("#deliverable").innerHTML = `<div class="card" style="margin-bottom:10px"><b>${esc(DECK.title)}</b> <span class="small muted">· ${DECK.slides.length} slides · click a slide to present (← → keys)</span>
+      ${q && q.panel?.length ? `<div class="small" style="margin-top:6px">Judge panel (qualitative): ${q.panel.map(p => `<b>${esc(p.judge)}</b> ${p.mean.toFixed(1)}/5 <span class="muted">“${esc(p.rationale)}”</span>`).join(" · ")}</div>` : ""}</div>
+      <div class="slides">${DECK.slides.map((s, i) => `<div class="slide" data-i="${i}"><div class="sx">${esc(s.section.replace("_", " "))}</div><h3>${esc(s.title)}</h3><ul>${s.bullets.slice(0, 5).map(b => `<li>${esc(b)}</li>`).join("")}</ul><span class="n">${i + 1}</span></div>`).join("")}</div>`;
+    return;
+  }
+  const hasOp = ds.some(d => d.fields && "operating_income" in d.fields);
+  $("#deliverMeta").innerHTML = "";
+  $("#deliverable").innerHTML = `<div class="card scroll"><table><tr><th>Company</th><th>FY</th><th>Revenue</th>${hasOp ? "<th>Op. income</th><th>Margin</th>" : ""}<th>Verification</th><th>Agent</th><th>Revenue citation</th></tr>
+    ${ds.map(d => { const f = d.fields, rev = f.revenue?.value, op = f.operating_income?.value, cite = f.revenue?.citation;
+      return `<tr><td><b>${esc(f.company?.value)}</b></td><td>${esc(f.fiscal_year?.value)}</td><td>${money(rev)}</td>
+      ${hasOp ? `<td>${money(op)}</td><td>${rev && op != null ? (100 * op / rev).toFixed(1) + "%" : "—"}</td>` : ""}
+      <td><span class="pill ${d.verification === "verified" ? "ok" : "warn"}">${esc(d.verification.replace("_", " "))}</span></td><td class="small">${esc(d.worker_id)}</td>
+      <td><div class="quote">${cite ? esc(cite.quote) : "—"}</div><div class="small muted">${cite ? esc(cite.page ? "page " + cite.page : cite.locator) : ""}</div></td></tr>`; }).join("")}</table></div>`;
+}
+$("#deliverable").addEventListener("click", e => { const s = e.target.closest(".slide"); if (s) { slideI = +s.dataset.i; showSlide(); $("#dlgSlide").showModal(); } });
+function showSlide() {
+  const s = DECK.slides[slideI];
+  $("#bigSlide").innerHTML = `<div class="big"><div class="sx">${esc(s.section.replace("_", " "))}</div><h2>${esc(s.title)}</h2><ul>${s.bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul>
+    ${s.notes ? `<p class="small muted" style="margin-top:18px"><b>Notes:</b> ${esc(s.notes)}</p>` : ""}
+    ${s.sources?.length ? `<div class="quote" style="margin-top:10px">Sources: ${s.sources.map(q => "“" + esc(q) + "”").join(" · ")}</div>` : ""}</div>`;
+  $("#slideIdx").textContent = `${slideI + 1} / ${DECK.slides.length}`;
+}
+$("#prevSlide").onclick = () => { slideI = Math.max(0, slideI - 1); showSlide(); };
+$("#nextSlide").onclick = () => { slideI = Math.min(DECK.slides.length - 1, slideI + 1); showSlide(); };
+$("#closeSlide").onclick = () => $("#dlgSlide").close();
+document.addEventListener("keydown", e => { if (!$("#dlgSlide").open) return; if (e.key === "ArrowRight") $("#nextSlide").click(); if (e.key === "ArrowLeft") $("#prevSlide").click(); });
+
+// ===================================================== sources & options
+function setPriority(v) { priority = v; document.querySelectorAll("#prio button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
+$("#prio").onclick = e => e.target.dataset.v && setPriority(e.target.dataset.v);
+$("#btnSrc").onclick = () => { $("#popSources").hidden = !$("#popSources").hidden; $("#popOpts").hidden = true; };
+$("#btnOpts").onclick = () => { $("#popOpts").hidden = !$("#popOpts").hidden; $("#popSources").hidden = true; };
+async function loadLibrary() { LIB = await api("/api/library"); renderLibrary(); }
+function renderLibrary() {
+  const groups = {brief: "Startup briefs (for decks)", sample: "Reports (for extraction)", web: "Web pages", uploads: "Uploaded"};
+  const extra = [...sources].filter(u => !LIB.find(l => l.uri === u)).map(u => ({uri: u, name: u, kind: "web", group: "web"}));
+  const all = [...LIB, ...extra];
+  $("#library").innerHTML = Object.entries(groups).map(([g, label]) => { const items = all.filter(l => l.group === g); if (!items.length) return "";
+    return `<div class="small muted" style="margin-top:4px">${label}</div>` + items.map(l => `<label class="src"><input type="checkbox" data-u="${esc(l.uri)}" ${sources.has(l.uri) ? "checked" : ""}><span class="k">${l.kind}</span>${esc(l.name)}</label>`).join(""); }).join("");
+}
+$("#library").onchange = e => { const u = e.target.dataset.u; e.target.checked ? sources.add(u) : sources.delete(u); renderAttached(); };
+function renderAttached() { $("#attached").innerHTML = [...sources].map(s => `<span class="att">📎 ${esc(s.split("/").pop())}<i data-rm="${esc(s)}">✕</i></span>`).join(""); }
+$("#attached").onclick = e => { if (e.target.dataset.rm) { sources.delete(e.target.dataset.rm); renderAttached(); renderLibrary(); } };
+$("#btnUrl").onclick = () => { const u = $("#url").value.trim(); if (!/^https?:\/\//.test(u)) return; sources.add(u); $("#url").value = ""; renderLibrary(); renderAttached(); };
+$("#docFile").onchange = async e => { const f = e.target.files[0]; if (!f) return; $("#docText").value = await f.text(); if (!$("#docName").value) $("#docName").value = f.name.replace(/\.[^.]+$/, ""); };
+$("#btnUpload").onclick = async () => { try { const d = await api("/api/upload", {method: "POST", body: {name: $("#docName").value, text: $("#docText").value}});
+  sources.add(d.uri); $("#docText").value = ""; $("#docName").value = ""; await loadLibrary(); renderAttached(); } catch (e) { alert(e.message); } };
+
+// ===================================================== family tabs & data
+function setFam(f) { famView = f; $("#famTabs").innerHTML = Object.entries(FAM).map(([k, v]) => `<button data-f="${k}" class="${k === f ? "on" : ""}">${v}</button>`).join(""); renderAll(); }
+$("#famTabs").onclick = e => e.target.dataset.f && setFam(e.target.dataset.f);
+async function loadAgents() {
+  AGENTS = await api("/api/agents");
+  for (const f of Object.keys(FAM)) {
+    if (!selected[f]) selected[f] = new Set(AGENTS.filter(a => a.available && a.families.includes(f)).map(a => a.worker_id));
+    [...selected[f]].forEach(id => { const a = AGENTS.find(x => x.worker_id === id); if (!a || !a.available) selected[f].delete(id); });
+  }
+  renderAll();
+}
+async function loadBench() { BENCH = await api("/api/benchmarks"); renderTests(); renderBoard(); }
+async function loadHistory() {
+  const jobs = await api("/api/jobs");
+  $("#history").innerHTML = `<option value="">Recent jobs…</option>` + jobs.map(j => `<option value="${j.job_id}">${esc(j.status)} · ${esc(j.objective.slice(0, 60))}</option>`).join("");
+}
+$("#history").onchange = async e => { if (e.target.value) openJob(await api("/api/jobs/" + e.target.value), false); };
+$("#btnNew").onclick = () => { if (es) es.close(); S = null; history.replaceState(null, "", "#"); resetChat(); renderAll(); };
+function renderAll() { renderLanes(); renderTests(); renderBoard(); renderDeliverable(); }
+
+// ===================================================== keys
+async function openKeys() {
+  const s = await api("/api/settings");
+  $("#provs").innerHTML = Object.entries(s).map(([pid, p]) => `<div class="prov" data-p="${pid}"><div class="crow" style="margin:0;justify-content:space-between"><b><span class="dot" style="background:${COLORS[pid]}"></span> ${esc(p.vendor)}</b>
+    <span class="pill ${p.key_rejected ? "bad" : p.key_set ? "ok" : "warn"}">${p.key_rejected ? "key rejected" : p.key_set ? "key from " + p.key_source + " " + esc(p.key_hint || "") : "no key"}</span></div>
+    <div class="g"><input type="password" data-f="api_key" placeholder="${p.key_set ? "leave blank to keep" : "API key"}"><input type="text" data-f="model" value="${esc(p.model)}"></div>
+    ${pid === "glm" ? `<input type="text" data-f="base_url" value="${esc(p.base_url)}" style="margin-top:6px">` : ""}
+    <div class="small muted" style="margin-top:4px">Est. $${p.price_per_mtok[0]} in / $${p.price_per_mtok[1]} out per 1M tokens</div></div>`).join("");
+  $("#dlgKeys").showModal();
+}
+$("#btnKeys").onclick = openKeys;
+$("#btnKeysClose").onclick = () => $("#dlgKeys").close();
+$("#btnKeysSave").onclick = async () => { const body = {};
+  document.querySelectorAll(".prov").forEach(el => { const cfg = {}; el.querySelectorAll("[data-f]").forEach(i => { if (i.value.trim()) cfg[i.dataset.f] = i.value.trim(); }); body[el.dataset.p] = cfg; });
+  await api("/api/settings", {method: "POST", body}); $("#dlgKeys").close(); selected = {}; loadAgents(); };
+
+function setView(v) { document.body.classList.toggle("client", v === "client"); document.querySelectorAll("#viewSeg button").forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
+$("#viewSeg").onclick = e => e.target.dataset.v && setView(e.target.dataset.v);
+resetChat(); setFam("pitch_deck"); loadLibrary(); loadAgents(); loadBench(); loadHistory();
+if (location.hash.startsWith("#job=")) api("/api/jobs/" + location.hash.slice(5)).then(j => openJob(j, false)).catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "skills": [
+    {
+      "id": "pitch-deck-advisor",
+      "title": "Pitch Deck Advisor",
+      "repository": "https://github.com/amaklakov-droid/pitch-deck-skill",
+      "commit": "3397a18aaf3a6ccd28eccd7e74b015860e3dae24",
+      "upstream_path": "pitch-deck-advisor/SKILL.md",
+      "license": "MIT",
+      "sha256": "9df769d82eb4e9445eb658daec03bf6d3bda904f17ea64788af151be14bda945",
+      "license_sha256": "a3f6ed8f4366b8f2149c82c6e8d04e6b1be122f47c4853f52e44378f9f6b97b1",
+      "sections": [
+        "## Three design laws (Y Combinator)",
+        "## Red flags \u2014 never let these into a deck",
+        "## Review mode",
+        "## Create mode"
+      ],
+      "integration": "instruction excerpts; no upstream code execution"
+    },
+    {
+      "id": "deckgen",
+      "title": "deckgen slide design",
+      "repository": "https://github.com/kingwatam/deckgen",
+      "commit": "41732bae7eecdec5341cafa659a5025f41ac0a3c",
+      "upstream_path": "SKILL.md",
+      "license": "MIT",
+      "sha256": "8f1914b83d92b8272d36745fc15430849c7a7453d84be7eb78c7262f127d78f1",
+      "license_sha256": "12120515c6df8bea282ebe4f06d5a6b56ae58c02aae5520433a84850bec9ba28",
+      "sections": [
+        "## Working from source documents",
+        "## Anti-patterns"
+      ],
+      "integration": "instruction excerpts; no upstream code execution"
+    }
+  ]
+}
